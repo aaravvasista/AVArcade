@@ -3,69 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aarav's Arcade</title>
+<title>Aarav's World</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #0c0c1d 100%);
-    color: #fff; min-height: 100vh;
-    display: flex; flex-direction: column; align-items: center;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #0c0c1d 100%);
+  color: #fff; min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
 
-  /* Header */
-  header { text-align: center; padding: 40px 20px 20px; }
-  header h1 {
-    font-size: 52px; color: #ffcc00;
-    text-shadow: 0 0 20px rgba(255,200,0,0.5), 0 0 60px rgba(255,200,0,0.2);
-    letter-spacing: 2px;
-  }
-  header p { font-size: 16px; color: #aaa; margin-top: 6px; }
+header { text-align: center; margin-bottom: 40px; }
+header h1 {
+  font-size: 56px; color: #ffcc00;
+  text-shadow: 0 0 20px rgba(255,200,0,0.5), 0 0 60px rgba(255,200,0,0.2);
+  letter-spacing: 2px;
+}
+header p { font-size: 18px; color: #aaa; margin-top: 8px; }
 
-  /* Game grid */
-  .games {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 24px; padding: 30px 24px; max-width: 900px; width: 100%;
-  }
+.cards {
+  display: flex; gap: 32px; flex-wrap: wrap; justify-content: center;
+  padding: 0 24px; max-width: 800px;
+}
 
-  .game-card {
-    background: rgba(255,255,255,0.06);
-    border: 2px solid rgba(255,255,255,0.1);
-    border-radius: 16px; padding: 28px 24px;
-    text-align: center; text-decoration: none; color: #fff;
-    transition: all 0.25s ease;
-    display: flex; flex-direction: column; align-items: center; gap: 10px;
-  }
-  .game-card:hover {
-    transform: translateY(-6px);
-    border-color: rgba(255,200,0,0.5);
-    background: rgba(255,255,255,0.1);
-    box-shadow: 0 12px 40px rgba(255,200,0,0.15);
-  }
+.card {
+  background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 40px 36px; text-align: center; color: #fff;
+  text-decoration: none; width: 320px;
+  transition: all 0.25s ease; display: flex; flex-direction: column;
+  align-items: center; gap: 14px;
+}
+.card:hover {
+  transform: translateY(-8px); border-color: rgba(255,200,0,0.5);
+  background: rgba(255,255,255,0.1); box-shadow: 0 16px 50px rgba(255,200,0,0.15);
+}
 
-  .game-icon { font-size: 56px; }
-  .game-card h2 { font-size: 22px; color: #fff; }
-  .game-card p { font-size: 13px; color: #aaa; line-height: 1.4; }
+.card-icon { font-size: 72px; }
+.card h2 { font-size: 26px; }
+.card p { font-size: 14px; color: #aaa; line-height: 1.5; }
 
-  .play-tag {
-    margin-top: auto; padding: 6px 20px;
-    border: 2px solid #00b894; border-radius: 8px;
-    font-size: 13px; font-weight: bold; color: #00b894;
-    transition: all 0.2s;
-  }
-  .game-card:hover .play-tag { background: #00b894; color: #fff; }
+.enter-tag {
+  margin-top: auto; padding: 8px 28px; border: 2px solid #00b894;
+  border-radius: 10px; font-size: 15px; font-weight: bold; color: #00b894;
+  transition: all 0.2s;
+}
+.card:hover .enter-tag { background: #00b894; color: #fff; }
 
-  /* Footer */
-  footer { padding: 30px 20px; text-align: center; font-size: 13px; color: #555; }
+footer { margin-top: 50px; font-size: 13px; color: #444; }
 
-  /* Stars background */
-  .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; overflow: hidden; }
-  .star {
-    position: absolute; width: 3px; height: 3px; background: #fff; border-radius: 50%;
-    animation: twinkle 3s infinite alternate;
-  }
-  @keyframes twinkle { 0% { opacity: 0.2; } 100% { opacity: 0.8; } }
+.stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; overflow: hidden; }
+.star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle 3s infinite alternate; }
+@keyframes twinkle { 0% { opacity: 0.2; } 100% { opacity: 0.8; } }
 </style>
 </head>
 <body>
@@ -73,55 +61,38 @@
 <div class="stars" id="stars"></div>
 
 <header>
-  <h1>🕹️ Aarav's Arcade</h1>
-  <p>Pick a game and start playing!</p>
+  <h1>🌟 Aarav's World</h1>
+  <p>Choose your adventure!</p>
 </header>
 
-<div class="games">
-
-  <a class="game-card" href="bowser_boss_game.html">
-    <div class="game-icon">🐢</div>
-    <h2>Bowser Boss Battle</h2>
-    <p>Dodge fireballs and defeat Bowser with ice attacks! How many levels can you beat?</p>
-    <div class="play-tag">PLAY</div>
+<div class="cards">
+  <a class="card" href="aaravs_arcade.html">
+    <div class="card-icon">🕹️</div>
+    <h2>Aarav's Arcade</h2>
+    <p>Play awesome games — Bowser Boss Battle, Dino Runner, Tic Tac Toe & Rock Paper Scissors!</p>
+    <div class="enter-tag">PLAY GAMES</div>
   </a>
 
-  <a class="game-card" href="dino_birds.html">
-    <div class="game-icon">🦖</div>
-    <h2>Dino Runner</h2>
-    <p>Jump over cacti and duck under birds in this endless runner!</p>
-    <div class="play-tag">PLAY</div>
+  <a class="card" href="reading_adventure.html">
+    <div class="card-icon">📖</div>
+    <h2>Reading Adventure</h2>
+    <p>Read stories, answer questions, earn coins and level up your reading skills!</p>
+    <div class="enter-tag">START READING</div>
   </a>
-
-  <a class="game-card" href="tic_tac_toe.html">
-    <div class="game-icon">❌⭕</div>
-    <h2>Tic Tac Toe</h2>
-    <p>Challenge the computer on Easy or Hard mode. Can you beat the AI?</p>
-    <div class="play-tag">PLAY</div>
-  </a>
-
-  <a class="game-card" href="rps_pacman_arcade.html">
-    <div class="game-icon">🪨📄✂️</div>
-    <h2>Rock Paper Scissors</h2>
-    <p>Pac-Man themed arcade battle! Play vs Computer or challenge a friend.</p>
-    <div class="play-tag">PLAY</div>
-  </a>
-
 </div>
 
 <footer>Made with ❤️ by Aarav</footer>
 
 <script>
-// Generate starfield
-const starsEl = document.getElementById('stars');
-for (let i = 0; i < 80; i++) {
-  let s = document.createElement('div');
+var el = document.getElementById('stars');
+for (var i = 0; i < 80; i++) {
+  var s = document.createElement('div');
   s.className = 'star';
   s.style.left = Math.random() * 100 + '%';
   s.style.top = Math.random() * 100 + '%';
-  s.style.animationDelay = (Math.random() * 3) + 's';
+  s.style.animationDelay = Math.random() * 3 + 's';
   s.style.width = s.style.height = (1 + Math.random() * 2) + 'px';
-  starsEl.appendChild(s);
+  el.appendChild(s);
 }
 </script>
 
