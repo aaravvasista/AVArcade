@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reading Adventure! 📚⭐</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+    overflow-x: hidden;
+  }
+
+  /* Floating background shapes */
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    opacity: 0.1;
+    z-index: 0;
+    animation: float 6s ease-in-out infinite;
+  }
+  body::before {
+    width: 300px; height: 300px;
+    background: #fff;
+    top: -50px; left: -50px;
+  }
+  body::after {
+    width: 200px; height: 200px;
+    background: #ffd700;
+    bottom: -30px; right: -30px;
+    animation-delay: 3s;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    80% { transform: scale(1.05); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes starPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+
+  .header {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 20px 15px 10px;
+  }
+  .header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(28px, 5vw, 48px);
+    color: #fff;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+    animation: popIn 0.6s ease;
+  }
+
+  .score-bar {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 10px auto;
+    flex-wrap: wrap;
+  }
+  .score-badge {
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50px;
+    padding: 8px 20px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .score-badge .icon { font-size: 20px; }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 10px auto 30px;
+    padding: 0 15px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    animation: slideUp 0.4s ease;
+  }
+
+  .hidden { display: none !important; }
+
+  /* Home Screen */
+  .home-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    color: #764ba2;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .home-subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+
+  .story-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .story-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 16px 20px;
+    border-radius: 16px;
+    border: 2.5px solid #e8e8e8;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .story-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  }
+
+  .story-card.small { border-left: 5px solid #4CAF50; }
+  .story-card.medium { border-left: 5px solid #FF9800; }
+  .story-card.large { border-left: 5px solid #E91E63; }
+  .story-card.locked { opacity: 0.5; cursor: not-allowed; }
+  .story-card.locked:hover { transform: none; box-shadow: none; }
+  .story-card.completed { border-color: #4CAF50; background: #f0fff0; }
+  .story-card.completed::after {
+    content: '✅';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 22px;
+  }
+
+  .story-emoji { font-size: 36px; flex-shrink: 0; }
+  .story-info { flex: 1; }
+  .story-info h3 { font-size: 16px; font-weight: 800; color: #333; margin-bottom: 2px; }
+  .story-info .meta { font-size: 13px; color: #999; }
+  .story-info .meta .size-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    margin-right: 6px;
+  }
+  .size-tag.small { background: #4CAF50; }
+  .size-tag.medium { background: #FF9800; }
+  .size-tag.large { background: #E91E63; }
+
+  .lock-icon {
+    font-size: 20px;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* Story Reading Screen */
+  .story-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .back-btn {
+    background: #f0f0f0;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .back-btn:hover { background: #ddd; }
+
+  .story-title-bar h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 22px;
+    color: #764ba2;
+  }
+  .story-title-bar .story-size {
+    font-size: 13px;
+    color: #999;
+  }
+
+  .story-content {
+    font-size: 19px;
+    line-height: 1.9;
+    color: #444;
+    padding: 20px;
+    background: #fafafa;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    border: 2px dashed #e0e0e0;
+  }
+
+  .quiz-ready-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 20px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: bounce 1s ease infinite;
+  }
+  .quiz-ready-btn:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 25px rgba(118,75,162,0.4);
+    animation: none;
+  }
+
+  /* Quiz Screen */
+  .quiz-progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    justify-content: center;
+  }
+  .quiz-dot {
+    width: 32px;
+    height: 8px;
+    border-radius: 4px;
+    background: #e0e0e0;
+    transition: background 0.3s;
+  }
+  .quiz-dot.active { background: #764ba2; }
+  .quiz-dot.correct { background: #4CAF50; }
+  .quiz-dot.wrong { background: #f44336; }
+
+  .quiz-question-num {
+    text-align: center;
+    color: #999;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .quiz-question {
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 24px;
+    color: #333;
+  }
+
+  .quiz-options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .quiz-option {
+    padding: 16px 20px;
+    border: 2.5px solid #e0e0e0;
+    border-radius: 14px;
+    background: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    color: #444;
+    font-family: 'Nunito', sans-serif;
+  }
+  .quiz-option:hover {
+    border-color: #764ba2;
+    background: #f8f0ff;
+    transform: translateX(4px);
+  }
+  .quiz-option.correct {
+    border-color: #4CAF50;
+    background: #e8f5e9;
+    color: #2e7d32;
+    animation: popIn 0.3s ease;
+  }
+  .quiz-option.wrong {
+    border-color: #f44336;
+    background: #ffebee;
+    color: #c62828;
+    animation: shake 0.4s ease;
+  }
+  .quiz-option.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  .quiz-option.reveal-correct {
+    border-color: #4CAF50;
+    background: #e8f5e9;
+    color: #2e7d32;
+    opacity: 1;
+  }
+
+  .quiz-feedback {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 800;
+    margin: 16px 0;
+    animation: popIn 0.3s ease;
+  }
+
+  .next-q-btn {
+    display: block;
+    margin: 16px auto 0;
+    padding: 12px 32px;
+    background: #764ba2;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .next-q-btn:hover { background: #5e3a85; }
+
+  /* Results Screen */
+  .results-emoji {
+    font-size: 64px;
+    text-align: center;
+    margin-bottom: 10px;
+    animation: bounce 0.8s ease infinite;
+  }
+  .results-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .results-subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  .results-score-box {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 24px;
+  }
+  .results-stat {
+    text-align: center;
+  }
+  .results-stat .big {
+    font-family: 'Fredoka One', cursive;
+    font-size: 36px;
+    color: #764ba2;
+  }
+  .results-stat .label {
+    font-size: 13px;
+    color: #999;
+    font-weight: 700;
+  }
+  .results-stars {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 16px;
+    animation: starPulse 1s ease infinite;
+  }
+  .results-msg {
+    text-align: center;
+    font-size: 16px;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+  .results-msg.pass { background: #e8f5e9; color: #2e7d32; }
+  .results-msg.fail { background: #fff3e0; color: #e65100; }
+
+  .results-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .results-btns button {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .results-btns button:hover { transform: scale(1.05); }
+  .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+  .btn-secondary { background: #f0f0f0; color: #555; }
+
+  /* Reset button */
+  .reset-btn {
+    display: block;
+    margin: 20px auto 0;
+    padding: 10px 20px;
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.6);
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Nunito', sans-serif;
+    margin-bottom: 30px;
+  }
+  .reset-btn:hover {
+    border-color: rgba(255,255,255,0.6);
+    color: #fff;
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    z-index: 999;
+    animation: confettiFall linear forwards;
+  }
+
+  /* Progress bar on home */
+  .overall-progress {
+    margin-bottom: 20px;
+  }
+  .progress-bar-bg {
+    width: 100%;
+    height: 14px;
+    background: #eee;
+    border-radius: 7px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #81C784);
+    border-radius: 7px;
+    transition: width 0.5s ease;
+  }
+  .progress-text {
+    text-align: center;
+    font-size: 13px;
+    color: #999;
+    margin-top: 4px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📚 Reading Adventure! ⭐</h1>
+  <div class="score-bar">
+    <div class="score-badge"><span class="icon">🌟</span> <span id="pointsDisplay">0</span> Points</div>
+    <div class="score-badge"><span class="icon">📖</span> <span id="storiesDisplay">0</span>/10 Stories</div>
+  </div>
+</div>
+
+<div class="container">
+  <div id="homeScreen" class="card"></div>
+  <div id="storyScreen" class="card hidden"></div>
+  <div id="quizScreen" class="card hidden"></div>
+  <div id="resultsScreen" class="card hidden"></div>
+</div>
+
+<button class="reset-btn" id="resetBtn">🔄 Start Over</button>
+
+<script>
+// ==================== ALL STORIES ====================
+const ALL_STORIES = [
+  // ---- 3 SMALL STORIES ----
+  {
+    id: 1,
+    title: "The Fastest Runner",
+    emoji: "🏃",
+    size: "small",
+    topic: "Sports",
+    text: "Maria loved to run. Every morning, she raced around the park before school. One day, her teacher said there would be a school race. Maria practiced every day after school too. She stretched her legs and ran faster and faster. On race day, Maria felt her heart beating quickly. The whistle blew and she took off! She pumped her arms and pushed hard. Maria crossed the finish line first! Her friends cheered loudly. Maria learned that practice and hard work can help you reach your goals.",
+    questions: [
+      { q: "What did Maria do every morning?", opts: ["She read a book", "She raced around the park", "She ate breakfast slowly", "She watched TV"], ans: 1 },
+      { q: "What event was coming at school?", opts: ["A spelling bee", "A school race", "A science fair", "A field trip"], ans: 1 },
+      { q: "How did Maria prepare for the race?", opts: ["She did nothing", "She watched other runners", "She practiced running every day", "She bought new shoes"], ans: 2 },
+      { q: "What happened when the whistle blew?", opts: ["Maria fell down", "Maria took off running", "Maria walked slowly", "Maria started crying"], ans: 1 },
+      { q: "What is the lesson of this story?", opts: ["Running is boring", "Practice and hard work help you reach your goals", "Races are not fun", "You should never run"], ans: 1 }
+    ]
+  },
+  {
+    id: 2,
+    title: "A Seed Grows Up",
+    emoji: "🌱",
+    size: "small",
+    topic: "Plant Life Cycle",
+    text: "Lily planted a tiny seed in a pot of soil. She watered it every day and placed it near a sunny window. After a few days, a small green sprout pushed through the dirt. Lily was so excited! She kept watering the sprout carefully. Weeks later, the sprout grew tall and green leaves appeared. Then one morning, Lily saw a beautiful yellow flower on her plant! She learned that plants need water, sunlight, and time to grow. Lily felt proud of her little garden.",
+    questions: [
+      { q: "What did Lily plant?", opts: ["A flower", "A tiny seed", "A tree branch", "A leaf"], ans: 1 },
+      { q: "Where did Lily put the pot?", opts: ["In the closet", "Under the bed", "Near a sunny window", "Outside in the snow"], ans: 2 },
+      { q: "What happened after a few days?", opts: ["The seed disappeared", "A sprout pushed through the dirt", "The pot broke", "Nothing happened"], ans: 1 },
+      { q: "What did the plant grow?", opts: ["Fruit", "A yellow flower", "A pumpkin", "More seeds"], ans: 1 },
+      { q: "What do plants need to grow?", opts: ["Only water", "Water, sunlight, and time", "Just soil", "Only sunshine"], ans: 1 }
+    ]
+  },
+  {
+    id: 3,
+    title: "Ruby Bridges: A Brave Girl",
+    emoji: "🌟",
+    size: "small",
+    topic: "American Heroes",
+    text: "In 1960, a six-year-old girl named Ruby Bridges did something very brave. She was the first Black child to go to an all-white school in New Orleans. Some people were angry, but Ruby was not afraid. Every day, she walked into school with her head held high. Federal marshals walked with her to keep her safe. Ruby studied hard and was a good student. Her bravery helped change unfair rules. Ruby showed the world that all children deserve to learn together. She became an American hero.",
+    questions: [
+      { q: "How old was Ruby Bridges?", opts: ["Four years old", "Six years old", "Ten years old", "Eight years old"], ans: 1 },
+      { q: "What was special about what Ruby did?", opts: ["She won a race", "She was the first Black child at an all-white school", "She planted a garden", "She wrote a book"], ans: 1 },
+      { q: "Who walked with Ruby to keep her safe?", opts: ["Her friends", "Her dog", "Federal marshals", "Her teacher"], ans: 2 },
+      { q: "How did Ruby act at school?", opts: ["She was scared and hid", "She walked with her head held high", "She stayed home", "She cried every day"], ans: 1 },
+      { q: "What is the main idea of this story?", opts: ["School is boring", "All children deserve to learn together", "Ruby did not like school", "Marshals are mean"], ans: 1 }
+    ]
+  },
+
+  // ---- 4 MEDIUM STORIES ----
+  {
+    id: 4,
+    title: "The Water Cycle Journey",
+    emoji: "💧",
+    size: "medium",
+    topic: "Science",
+    text: "Have you ever wondered where rain comes from? It all starts with the water cycle! The sun heats up water in oceans, lakes, and rivers. The warm water turns into tiny drops of water vapor that float up into the sky. This is called evaporation.\n\nAs the water vapor goes higher, the air gets colder. The vapor turns back into tiny water droplets and forms clouds. This is called condensation. The clouds get bigger and heavier as more droplets join together.\n\nWhen the clouds cannot hold any more water, the droplets fall back down as rain, snow, sleet, or hail. This is called precipitation. The rain flows into rivers, lakes, and oceans. Then the whole cycle starts all over again!\n\nThe water cycle is important because it gives us fresh water to drink. It also helps plants grow and keeps animals alive. Without the water cycle, life on Earth would not be possible.",
+    questions: [
+      { q: "What heats up the water to start the water cycle?", opts: ["The moon", "The wind", "The sun", "The clouds"], ans: 2 },
+      { q: "What is it called when water turns into water vapor?", opts: ["Condensation", "Precipitation", "Evaporation", "Freezing"], ans: 2 },
+      { q: "What happens during condensation?", opts: ["Water falls as rain", "Water vapor forms clouds", "Ice melts into water", "Rivers flow to the ocean"], ans: 1 },
+      { q: "What is precipitation?", opts: ["Water turning to vapor", "Clouds forming in the sky", "Water falling as rain, snow, sleet, or hail", "The sun heating water"], ans: 2 },
+      { q: "Why is the water cycle important?", opts: ["It makes the sky pretty", "It gives us fresh water and helps plants and animals", "It keeps the sun shining", "It creates mountains"], ans: 1 }
+    ]
+  },
+  {
+    id: 5,
+    title: "Jackie Robinson's Big Dream",
+    emoji: "⚾",
+    size: "medium",
+    topic: "American Heroes / Sports",
+    text: "Jackie Robinson grew up in California. He loved playing sports, especially baseball. Jackie was an amazing athlete. He could hit, run, and catch better than almost anyone.\n\nIn the 1940s, Black players were not allowed to play in Major League Baseball. The rules were unfair. But a man named Branch Rickey believed that was wrong. He asked Jackie to join the Brooklyn Dodgers in 1947.\n\nIt was not easy for Jackie. Some fans yelled mean things at him. Some players did not want to play with him. But Jackie made a promise not to fight back. He let his talent do the talking. He played so well that people could not ignore how good he was.\n\nJackie Robinson became one of the greatest baseball players ever. He was named Rookie of the Year in his first season! More importantly, he opened the door for all people to play baseball together. Jackie showed that courage and talent can break down unfair walls.",
+    questions: [
+      { q: "What sport did Jackie Robinson love most?", opts: ["Basketball", "Football", "Baseball", "Soccer"], ans: 2 },
+      { q: "What was unfair in the 1940s?", opts: ["There were no baseball teams", "Black players could not play in Major League Baseball", "There were no baseballs", "Games were too short"], ans: 1 },
+      { q: "Who asked Jackie to join the Brooklyn Dodgers?", opts: ["His mother", "The president", "Branch Rickey", "His coach"], ans: 2 },
+      { q: "How did Jackie handle people being mean to him?", opts: ["He fought back", "He quit the team", "He let his talent do the talking", "He yelled at them"], ans: 2 },
+      { q: "What award did Jackie win in his first season?", opts: ["Most Valuable Player", "Best Pitcher", "Rookie of the Year", "Gold Medal"], ans: 2 }
+    ]
+  },
+  {
+    id: 6,
+    title: "The Butterfly's Amazing Change",
+    emoji: "🦋",
+    size: "medium",
+    topic: "Science / Life Cycle",
+    text: "A butterfly goes through one of nature's most amazing changes. It is called metamorphosis. This big word means a complete change in body shape!\n\nIt all starts when a mother butterfly lays tiny eggs on a leaf. After a few days, a small caterpillar hatches from each egg. The caterpillar is very hungry! It eats leaves all day long and grows bigger and bigger. As it grows, it sheds its skin several times because its old skin gets too tight.\n\nWhen the caterpillar is big enough, it stops eating. It attaches itself to a branch and forms a hard shell called a chrysalis. Inside the chrysalis, something magical happens. The caterpillar's body completely changes over about two weeks.\n\nFinally, the chrysalis cracks open and a beautiful butterfly comes out! At first, its wings are wet and crumpled. The butterfly waits for its wings to dry. Then it flies away to find flowers and drink sweet nectar. Soon, the butterfly will lay its own eggs, and the whole cycle begins again!",
+    questions: [
+      { q: "What is metamorphosis?", opts: ["A type of flower", "A complete change in body shape", "A kind of butterfly", "A leaf that caterpillars eat"], ans: 1 },
+      { q: "Where does the mother butterfly lay her eggs?", opts: ["In the water", "On a rock", "On a leaf", "In the dirt"], ans: 2 },
+      { q: "Why does the caterpillar shed its skin?", opts: ["It is too cold", "Its skin gets too tight as it grows", "It wants to be colorful", "To scare other animals"], ans: 1 },
+      { q: "What is the hard shell called?", opts: ["A cocoon", "A chrysalis", "A nest", "A shell"], ans: 1 },
+      { q: "What does the butterfly do after its wings dry?", opts: ["Goes to sleep", "Flies away to find flowers", "Goes back in the chrysalis", "Eats more leaves"], ans: 1 }
+    ]
+  },
+  {
+    id: 7,
+    title: "Teamwork on the Court",
+    emoji: "🏀",
+    size: "medium",
+    topic: "Sports",
+    text: "The Wildcats basketball team had a big problem. They kept losing games because everyone wanted to be the star. Aiden always tried to shoot from far away. Mia dribbled too much and never passed. Sam got upset when he did not get the ball.\n\nCoach Hernandez called a team meeting. \"Basketball is a team sport,\" she said. \"No one player can win a game alone. You have to work together.\" The team did not believe her at first.\n\nCoach had an idea. During practice, she made a new rule: every player had to pass the ball at least three times before anyone could shoot. At first, it felt strange. But soon, the players started finding each other in open spots. Aiden passed to Mia, who passed to Sam, who made an easy basket!\n\nAt their next game, the Wildcats used teamwork. They passed and moved together like a real team. They won 24 to 18! After the game, the players high-fived each other. \"We did it together,\" Aiden said with a smile. The Wildcats learned that teamwork makes everyone better.",
+    questions: [
+      { q: "Why did the Wildcats keep losing?", opts: ["They did not practice", "Everyone wanted to be the star", "They did not have a coach", "The other teams cheated"], ans: 1 },
+      { q: "What was Coach Hernandez's new rule?", opts: ["No one could shoot", "Everyone had to run laps", "Pass the ball at least three times before shooting", "Only one person could score"], ans: 2 },
+      { q: "What happened when the team started passing?", opts: ["They got confused", "They found each other in open spots and scored", "They lost the ball", "They stopped playing"], ans: 1 },
+      { q: "What was the score of the next game?", opts: ["30 to 20", "24 to 18", "10 to 8", "50 to 40"], ans: 1 },
+      { q: "What is the main lesson of this story?", opts: ["Only the best player matters", "Teamwork makes everyone better", "Basketball is too hard", "Coaches are always wrong"], ans: 1 }
+    ]
+  },
+
+  // ---- 3 LARGE STORIES ----
+  {
+    id: 8,
+    title: "The Life of an Oak Tree",
+    emoji: "🌳",
+    size: "large",
+    topic: "Science / Plant Life Cycle",
+    text: "Deep in a green forest, a squirrel buried an acorn in the soft soil. The squirrel forgot about the acorn, but something wonderful was about to happen!\n\nIn spring, rain soaked the ground and the warm sun shone down. The acorn's hard shell cracked open. A tiny root pushed down into the soil to drink water. Then a small green shoot pushed up toward the sunlight. The baby oak tree was called a seedling.\n\nThe seedling grew slowly, year after year. Its stem became thicker and turned into a trunk covered with rough bark. The bark protected the tree like armor. Branches stretched out in all directions, and green leaves spread wide to catch the sunlight. The leaves used sunlight, water, and air to make food for the tree. This special process is called photosynthesis.\n\nAfter about twenty years, the oak tree was tall and strong. It started growing its own acorns! Each fall, hundreds of acorns dropped from its branches. Squirrels, deer, and birds ate many of them. Some acorns were buried and forgotten, just like the original one. These would grow into new oak trees.\n\nThe oak tree became a home for many creatures. Birds built nests in its branches. Squirrels lived in holes in its trunk. Insects crawled under its bark. On hot summer days, children sat in its cool shade to read and play.\n\nThe oak tree could live for hundreds of years. As it grew older, its trunk became wider and its roots spread deep underground. The roots held the soil in place and stopped it from washing away in the rain. The tree also cleaned the air by taking in a gas called carbon dioxide and releasing fresh oxygen for animals and people to breathe.\n\nOne old oak tree was like a tiny world of its own, giving life and shelter to hundreds of living things. And it all started from one small acorn that a squirrel forgot!",
+    questions: [
+      { q: "How did the oak tree's life begin?", opts: ["A farmer planted it", "A squirrel buried and forgot an acorn", "It fell from the sky", "It grew from a leaf"], ans: 1 },
+      { q: "What is a baby tree called?", opts: ["A sapling", "A seedling", "A sprout", "A bush"], ans: 1 },
+      { q: "What is photosynthesis?", opts: ["When trees lose their leaves", "When bark falls off", "When leaves use sunlight, water, and air to make food", "When roots drink water"], ans: 2 },
+      { q: "How old was the oak when it started growing acorns?", opts: ["About five years", "About ten years", "About twenty years", "About one hundred years"], ans: 2 },
+      { q: "How does the oak tree help clean the air?", opts: ["By dropping leaves", "By growing taller", "By taking in carbon dioxide and releasing oxygen", "By making shade"], ans: 2 }
+    ]
+  },
+  {
+    id: 9,
+    title: "Amelia Earhart: Queen of the Sky",
+    emoji: "✈️",
+    size: "large",
+    topic: "American Heroes",
+    text: "Amelia Earhart was born in 1897 in Kansas. Even as a little girl, Amelia was not like everyone else. She climbed trees, hunted for bugs, and rode her sled down steep hills. She was brave and curious, and she loved adventure!\n\nWhen Amelia was 23 years old, she went to an air show. She watched small planes loop and dive in the sky. Amelia knew right away that she wanted to fly! She took her first flying lesson and fell in love with being in the air. She saved all her money to buy her own small yellow plane. She called it \"The Canary.\"\n\nAmelia practiced flying every chance she got. She got better and better. In 1928, she became the first woman to fly across the Atlantic Ocean as a passenger. People all over the world were amazed! Newspapers called her \"Lady Lindy\" because she was as famous as the pilot Charles Lindbergh.\n\nBut Amelia was not happy being just a passenger. In 1932, she flew across the Atlantic Ocean all by herself! She flew through dark storms and thick fog. Ice formed on her plane's wings. It was very scary, but Amelia kept going. She landed safely in Ireland after about 15 hours of flying. She was the first woman to fly solo across the Atlantic!\n\nAmelia became one of the most famous people in the world. She wrote books about her adventures. She gave speeches telling girls that they could do anything boys could do. \"The most difficult thing is the decision to act,\" she said. \"The rest is just stubbornness.\"\n\nAmelia kept setting new records. She flew across the Pacific Ocean alone and set speed records. In 1937, she tried to fly all the way around the world. Sadly, during this trip, her plane disappeared over the Pacific Ocean. No one ever found Amelia or her plane.\n\nEven though her story ended in mystery, Amelia Earhart inspired millions of people. She showed the world that women could be brave, strong, and do incredible things. Today she is remembered as one of America's greatest heroes and a true pioneer of the sky.",
+    questions: [
+      { q: "What was Amelia like as a child?", opts: ["Quiet and shy", "Brave and curious and loved adventure", "Afraid of everything", "She only liked reading"], ans: 1 },
+      { q: "What was Amelia's first plane called?", opts: ["The Eagle", "The Canary", "The Bluebird", "The Falcon"], ans: 1 },
+      { q: "What happened in 1932?", opts: ["Amelia was born", "Amelia flew across the Atlantic alone", "Amelia bought her first plane", "Amelia went to an air show"], ans: 1 },
+      { q: "What challenges did Amelia face flying across the Atlantic?", opts: ["Sunny skies", "Dark storms, thick fog, and ice on her wings", "Other planes in the way", "She ran out of food"], ans: 1 },
+      { q: "Why is Amelia remembered as an American hero?", opts: ["She was very rich", "She showed women could be brave and do incredible things", "She invented the airplane", "She was a famous singer"], ans: 1 }
+    ]
+  },
+  {
+    id: 10,
+    title: "Our Amazing Solar System",
+    emoji: "🪐",
+    size: "large",
+    topic: "Science",
+    text: "Look up at the sky at night. Those tiny twinkling lights are stars! Our sun is a star too, but it looks much bigger because it is much closer to us. The sun and everything that moves around it is called our solar system.\n\nEight planets travel around the sun in paths called orbits. The four planets closest to the sun are Mercury, Venus, Earth, and Mars. They are called the rocky planets because they have hard, solid surfaces. Mercury is the smallest and closest to the sun. It is very hot during the day and freezing cold at night! Venus is covered in thick clouds and is the hottest planet, even hotter than Mercury.\n\nEarth is the third planet from the sun. It is the only planet we know of that has life! Earth has water, air, and just the right temperature for plants, animals, and people to live. Our moon circles around Earth about once every month.\n\nMars is called the Red Planet because its soil has a lot of iron that turned rusty. Scientists have sent robots called rovers to Mars to take pictures and study the soil. Maybe one day, people will visit Mars!\n\nThe four outer planets are Jupiter, Saturn, Uranus, and Neptune. They are called gas giants because they are made mostly of gas and they are much, much bigger than the rocky planets. Jupiter is the biggest planet in our solar system. It is so big that more than 1,000 Earths could fit inside it! Jupiter has a giant red spot that is actually a huge storm that has lasted for hundreds of years.\n\nSaturn is famous for its beautiful rings. The rings are made of billions of pieces of ice, rock, and dust. Uranus is tilted on its side, so it rolls around the sun like a ball. Neptune is the farthest planet from the sun and has the strongest winds in the solar system.\n\nOur solar system also has dwarf planets like Pluto, asteroid belts, comets with glowing tails, and many moons. Scientists are always discovering new things about space. Who knows what amazing secrets are still waiting to be found!",
+    questions: [
+      { q: "How many planets travel around the sun?", opts: ["Six", "Seven", "Eight", "Nine"], ans: 2 },
+      { q: "Which planet is the hottest?", opts: ["Mercury", "Venus", "Mars", "Jupiter"], ans: 1 },
+      { q: "Why is Mars called the Red Planet?", opts: ["It is covered in lava", "Its soil has iron that turned rusty", "It is very hot", "It has red clouds"], ans: 1 },
+      { q: "What are Saturn's rings made of?", opts: ["Gas and fire", "Pieces of ice, rock, and dust", "Colorful paint", "Light from the sun"], ans: 1 },
+      { q: "What makes Earth special compared to other planets?", opts: ["It is the biggest", "It is the closest to the sun", "It is the only planet known to have life", "It has the most moons"], ans: 2 }
+    ]
+  }
+];
+
+// ==================== STATE ====================
+let totalPoints = parseInt(localStorage.getItem('ra_points')) || 0;
+let completedStories = JSON.parse(localStorage.getItem('ra_completed') || '[]');
+
+let currentStoryIndex = -1;
+let currentQuestionIndex = 0;
+let quizScore = 0;
+let quizAnswers = []; // track per-question result
+
+function saveState() {
+  localStorage.setItem('ra_points', totalPoints);
+  localStorage.setItem('ra_completed', JSON.stringify(completedStories));
+}
+
+function updateScoreboard() {
+  document.getElementById('pointsDisplay').textContent = totalPoints;
+  document.getElementById('storiesDisplay').textContent = completedStories.length;
+}
+
+// ==================== SCREENS ====================
+function showOnly(id) {
+  ['homeScreen','storyScreen','quizScreen','resultsScreen'].forEach(function(s) {
+    document.getElementById(s).classList.add('hidden');
+  });
+  document.getElementById(id).classList.remove('hidden');
+}
+
+// ==================== HOME ====================
+function showHome() {
+  showOnly('homeScreen');
+  updateScoreboard();
+
+  var completedCount = completedStories.length;
+  var pct = Math.round((completedCount / ALL_STORIES.length) * 100);
+
+  var html = '<div class="home-title">Choose a Story! 📖</div>' +
+    '<div class="home-subtitle">Read stories and answer questions to earn points!</div>' +
+    '<div class="overall-progress">' +
+    '<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:' + pct + '%"></div></div>' +
+    '<div class="progress-text">' + completedCount + ' of ' + ALL_STORIES.length + ' stories completed (' + pct + '%)</div>' +
+    '</div>' +
+    '<div class="story-grid">';
+
+  ALL_STORIES.forEach(function(story, i) {
+    var done = completedStories.indexOf(story.id) !== -1;
+    // A story is locked if the previous story (by index) is not completed, except the first one
+    var locked = i > 0 && completedStories.indexOf(ALL_STORIES[i - 1].id) === -1 && !done;
+
+    html += '<div class="story-card ' + story.size + (done ? ' completed' : '') + (locked ? ' locked' : '') + '"' +
+      ' data-index="' + i + '"' + (locked ? '' : ' role="button" tabindex="0"') + '>' +
+      '<div class="story-emoji">' + story.emoji + '</div>' +
+      '<div class="story-info">' +
+      '<h3>' + story.title + '</h3>' +
+      '<div class="meta">' +
+      '<span class="size-tag ' + story.size + '">' + story.size.toUpperCase() + '</span>' +
+      story.topic +
+      '</div></div>' +
+      (locked ? '<span class="lock-icon">🔒</span>' : '') +
+      '</div>';
+  });
+
+  html += '</div>';
+
+  if (completedCount === ALL_STORIES.length) {
+    html += '<div style="text-align:center;margin-top:20px;">' +
+      '<div style="font-size:40px;">🏆🎉🌟</div>' +
+      '<div class="home-title" style="color:#4CAF50;">You finished ALL stories! Amazing job!</div>' +
+      '<div class="home-subtitle">Total Points: ' + totalPoints + '</div>' +
+      '</div>';
+  }
+
+  document.getElementById('homeScreen').innerHTML = html;
+
+  // attach click handlers
+  var cards = document.querySelectorAll('.story-card:not(.locked)');
+  for (var c = 0; c < cards.length; c++) {
+    (function(card) {
+      card.addEventListener('click', function() {
+        var idx = parseInt(card.getAttribute('data-index'));
+        openStory(idx);
+      });
+    })(cards[c]);
+  }
+}
+
+// ==================== STORY READING ====================
+function openStory(index) {
+  currentStoryIndex = index;
+  var story = ALL_STORIES[index];
+  showOnly('storyScreen');
+
+  var paragraphs = story.text.split('\n\n');
+  var storyHtml = '';
+  for (var p = 0; p < paragraphs.length; p++) {
+    storyHtml += '<p style="margin-bottom:14px;">' + paragraphs[p].trim() + '</p>';
+  }
+
+  document.getElementById('storyScreen').innerHTML =
+    '<div class="story-header">' +
+    '<button class="back-btn" id="storyBackBtn">⬅</button>' +
+    '<div class="story-title-bar">' +
+    '<h2>' + story.emoji + ' ' + story.title + '</h2>' +
+    '<div class="story-size"><span class="size-tag ' + story.size + '">' + story.size.toUpperCase() + '</span> ' + story.topic + '</div>' +
+    '</div></div>' +
+    '<div class="story-content">' + storyHtml + '</div>' +
+    '<button class="quiz-ready-btn" id="startQuizBtn">I\'m Ready for Questions! 🧠</button>';
+
+  document.getElementById('storyBackBtn').addEventListener('click', showHome);
+  document.getElementById('startQuizBtn').addEventListener('click', startQuiz);
+}
+
+// ==================== QUIZ ====================
+function startQuiz() {
+  currentQuestionIndex = 0;
+  quizScore = 0;
+  quizAnswers = [];
+  showOnly('quizScreen');
+  showQuestion();
+}
+
+function showQuestion() {
+  var story = ALL_STORIES[currentStoryIndex];
+  var total = story.questions.length;
+  var qData = story.questions[currentQuestionIndex];
+
+  var dotsHtml = '';
+  for (var i = 0; i < total; i++) {
+    var cls = 'quiz-dot';
+    if (i < quizAnswers.length) cls += quizAnswers[i] ? ' correct' : ' wrong';
+    else if (i === currentQuestionIndex) cls += ' active';
+    dotsHtml += '<div class="' + cls + '"></div>';
+  }
+
+  var optsHtml = '';
+  for (var j = 0; j < qData.opts.length; j++) {
+    optsHtml += '<button class="quiz-option" data-idx="' + j + '">' + qData.opts[j] + '</button>';
+  }
+
+  document.getElementById('quizScreen').innerHTML =
+    '<div class="story-header">' +
+    '<button class="back-btn" id="quizBackBtn">⬅</button>' +
+    '<div class="story-title-bar">' +
+    '<h2>🧠 Quiz Time!</h2>' +
+    '<div class="story-size">' + story.title + '</div>' +
+    '</div></div>' +
+    '<div class="quiz-progress">' + dotsHtml + '</div>' +
+    '<div class="quiz-question-num">Question ' + (currentQuestionIndex + 1) + ' of ' + total + '</div>' +
+    '<div class="quiz-question">' + qData.q + '</div>' +
+    '<div class="quiz-options">' + optsHtml + '</div>' +
+    '<div id="feedbackArea"></div>';
+
+  document.getElementById('quizBackBtn').addEventListener('click', function() { openStory(currentStoryIndex); });
+
+  var optBtns = document.querySelectorAll('.quiz-option');
+  for (var k = 0; k < optBtns.length; k++) {
+    (function(btn) {
+      btn.addEventListener('click', function() { handleAnswer(parseInt(btn.getAttribute('data-idx'))); });
+    })(optBtns[k]);
+  }
+}
+
+function handleAnswer(chosenIdx) {
+  var story = ALL_STORIES[currentStoryIndex];
+  var qData = story.questions[currentQuestionIndex];
+  var correct = chosenIdx === qData.ans;
+
+  if (correct) {
+    quizScore++;
+    totalPoints += 20;
+    updateScoreboard();
+  }
+  quizAnswers.push(correct);
+
+  // highlight options
+  var allOpts = document.querySelectorAll('.quiz-option');
+  for (var i = 0; i < allOpts.length; i++) {
+    var idx = parseInt(allOpts[i].getAttribute('data-idx'));
+    allOpts[i].classList.add('disabled');
+    if (idx === qData.ans) allOpts[i].classList.add(correct && idx === chosenIdx ? 'correct' : 'reveal-correct');
+    if (idx === chosenIdx && !correct) allOpts[i].classList.add('wrong');
+  }
+
+  // feedback
+  var fb = document.getElementById('feedbackArea');
+  if (correct) {
+    fb.innerHTML = '<div class="quiz-feedback" style="color:#4CAF50;">✅ Correct! +20 points!</div>';
+  } else {
+    fb.innerHTML = '<div class="quiz-feedback" style="color:#f44336;">❌ Not quite! The answer is highlighted in green.</div>';
+  }
+
+  // next button
+  var isLast = currentQuestionIndex >= story.questions.length - 1;
+  fb.innerHTML += '<button class="next-q-btn" id="nextQBtn">' + (isLast ? 'See Results 🎯' : 'Next Question ➡️') + '</button>';
+  document.getElementById('nextQBtn').addEventListener('click', function() {
+    if (isLast) {
+      showResults();
+    } else {
+      currentQuestionIndex++;
+      showQuestion();
+    }
+  });
+}
+
+// ==================== RESULTS ====================
+function showResults() {
+  var story = ALL_STORIES[currentStoryIndex];
+  var total = story.questions.length;
+  var passed = quizScore >= 4;
+  var pointsEarned = quizScore * 20;
+
+  if (passed && completedStories.indexOf(story.id) === -1) {
+    completedStories.push(story.id);
+  }
+  saveState();
+  updateScoreboard();
+
+  var stars = quizScore === 5 ? '⭐⭐⭐' : quizScore === 4 ? '⭐⭐' : quizScore >= 3 ? '⭐' : '';
+  var emoji, title;
+  if (quizScore === 5) { emoji = '🎉'; title = 'Perfect Score!'; }
+  else if (quizScore === 4) { emoji = '🌟'; title = 'Great Job!'; }
+  else if (quizScore === 3) { emoji = '😊'; title = 'Good Try!'; }
+  else { emoji = '💪'; title = 'Keep Trying!'; }
+
+  showOnly('resultsScreen');
+
+  var html =
+    '<div class="results-emoji">' + emoji + '</div>' +
+    '<div class="results-title">' + title + '</div>' +
+    '<div class="results-subtitle">' + story.title + '</div>' +
+    (stars ? '<div class="results-stars">' + stars + '</div>' : '') +
+    '<div class="results-score-box">' +
+    '<div class="results-stat"><div class="big">' + quizScore + '/' + total + '</div><div class="label">Correct</div></div>' +
+    '<div class="results-stat"><div class="big">+' + pointsEarned + '</div><div class="label">Points Earned</div></div>' +
+    '</div>';
+
+  if (passed) {
+    html += '<div class="results-msg pass">🎊 You passed! You can move on to the next story!</div>';
+  } else {
+    html += '<div class="results-msg fail">You need at least 4 out of 5 correct to move on. Read the story again and try the quiz! 📖</div>';
+  }
+
+  html += '<div class="results-btns">';
+  if (!passed) {
+    html += '<button class="btn-primary" id="retryBtn">📖 Read Again</button>';
+  }
+  html += '<button class="' + (passed ? 'btn-primary' : 'btn-secondary') + '" id="homeBtn">🏠 Back to Stories</button>';
+  html += '</div>';
+
+  document.getElementById('resultsScreen').innerHTML = html;
+
+  if (!passed) {
+    document.getElementById('retryBtn').addEventListener('click', function() { openStory(currentStoryIndex); });
+  }
+  document.getElementById('homeBtn').addEventListener('click', showHome);
+
+  if (passed) launchConfetti();
+}
+
+// ==================== CONFETTI ====================
+function launchConfetti() {
+  var colors = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff6bcb','#a66cff'];
+  for (var i = 0; i < 50; i++) {
+    var piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+    piece.style.animationDelay = (Math.random() * 1.5) + 's';
+    document.body.appendChild(piece);
+    (function(p) { setTimeout(function() { p.remove(); }, 5000); })(piece);
+  }
+}
+
+// ==================== RESET ====================
+document.getElementById('resetBtn').addEventListener('click', function() {
+  if (confirm('Start over? This will reset all your points and progress.')) {
+    localStorage.removeItem('ra_points');
+    localStorage.removeItem('ra_completed');
+    totalPoints = 0;
+    completedStories = [];
+    saveState();
+    updateScoreboard();
+    showHome();
+  }
+});
+
+// ==================== INIT ====================
+updateScoreboard();
+showHome();
+</script>
+</body>
+</html>
