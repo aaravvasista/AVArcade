@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aarav's Arcade</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #0c0c1d 100%);
+    color: #fff; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  /* Header */
+  header { text-align: center; padding: 40px 20px 20px; }
+  header h1 {
+    font-size: 52px; color: #ffcc00;
+    text-shadow: 0 0 20px rgba(255,200,0,0.5), 0 0 60px rgba(255,200,0,0.2);
+    letter-spacing: 2px;
+  }
+  header p { font-size: 16px; color: #aaa; margin-top: 6px; }
+
+  /* Game grid */
+  .games {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px; padding: 30px 24px; max-width: 900px; width: 100%;
+  }
+
+  .game-card {
+    background: rgba(255,255,255,0.06);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 16px; padding: 28px 24px;
+    text-align: center; text-decoration: none; color: #fff;
+    transition: all 0.25s ease;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .game-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(255,200,0,0.5);
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 12px 40px rgba(255,200,0,0.15);
+  }
+
+  .game-icon { font-size: 56px; }
+  .game-card h2 { font-size: 22px; color: #fff; }
+  .game-card p { font-size: 13px; color: #aaa; line-height: 1.4; }
+
+  .play-tag {
+    margin-top: auto; padding: 6px 20px;
+    border: 2px solid #00b894; border-radius: 8px;
+    font-size: 13px; font-weight: bold; color: #00b894;
+    transition: all 0.2s;
+  }
+  .game-card:hover .play-tag { background: #00b894; color: #fff; }
+
+  /* Footer */
+  footer { padding: 30px 20px; text-align: center; font-size: 13px; color: #555; }
+
+  /* Stars background */
+  .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; overflow: hidden; }
+  .star {
+    position: absolute; width: 3px; height: 3px; background: #fff; border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+  }
+  @keyframes twinkle { 0% { opacity: 0.2; } 100% { opacity: 0.8; } }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<header>
+  <h1>🕹️ Aarav's Arcade</h1>
+  <p>Pick a game and start playing!</p>
+</header>
+
+<div class="games">
+
+  <a class="game-card" href="bowser_boss_game.html">
+    <div class="game-icon">🐢</div>
+    <h2>Bowser Boss Battle</h2>
+    <p>Dodge fireballs and defeat Bowser with ice attacks! How many levels can you beat?</p>
+    <div class="play-tag">PLAY</div>
+  </a>
+
+  <a class="game-card" href="dino_birds.html">
+    <div class="game-icon">🦖</div>
+    <h2>Dino Runner</h2>
+    <p>Jump over cacti and duck under birds in this endless runner!</p>
+    <div class="play-tag">PLAY</div>
+  </a>
+
+  <a class="game-card" href="tic_tac_toe.html">
+    <div class="game-icon">❌⭕</div>
+    <h2>Tic Tac Toe</h2>
+    <p>Challenge the computer on Easy or Hard mode. Can you beat the AI?</p>
+    <div class="play-tag">PLAY</div>
+  </a>
+
+  <a class="game-card" href="rps_pacman_arcade.html">
+    <div class="game-icon">🪨📄✂️</div>
+    <h2>Rock Paper Scissors</h2>
+    <p>Pac-Man themed arcade battle! Play vs Computer or challenge a friend.</p>
+    <div class="play-tag">PLAY</div>
+  </a>
+
+</div>
+
+<footer>Made with ❤️ by Aarav</footer>
+
+<script>
+// Generate starfield
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 80; i++) {
+  let s = document.createElement('div');
+  s.className = 'star';
+  s.style.left = Math.random() * 100 + '%';
+  s.style.top = Math.random() * 100 + '%';
+  s.style.animationDelay = (Math.random() * 3) + 's';
+  s.style.width = s.style.height = (1 + Math.random() * 2) + 'px';
+  starsEl.appendChild(s);
+}
+</script>
+
+</body>
+</html>
